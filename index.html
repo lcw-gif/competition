@@ -38,7 +38,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
 .btn-r{background:var(--red)}
 .actions{display:flex;gap:5px}
 
-.map-wrap{position:relative;width:100%;max-width:750px;margin:10px auto;padding-bottom:60px;aspect-ratio:640/791}
+.map-wrap{position:relative;width:100%;max-width:750px;margin:10px auto;aspect-ratio:640/731}
 .map-canvas{position:absolute;inset:0;border:3px solid #3a6ea5;border-radius:8px;background:linear-gradient(180deg,#111d28,#0d1520)}
 .map-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 
@@ -115,7 +115,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
   <div class="timer-box">
     <button class="btn btn-g" id="timerBtn" onclick="toggleTimer()">▶</button>
     <button class="btn btn-o" onclick="resetTimer()" title="重設計時器">↺</button>
-    <div class="timer" id="timer">08:00</div>
+    <div class="timer" id="timer">08:00.00</div>
     <div class="cur-score"><span id="curScore">0</span>/140</div>
     <div class="actions">
       <button class="btn btn-o" onclick="showSummary()">📊</button>
@@ -128,13 +128,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
 <div class="map-wrap" id="mapWrap">
   <div class="map-canvas"></div>
   <svg class="map-svg" viewBox="0 0 640 731" preserveAspectRatio="xMidYMid meet">
-    <rect x="68" y="92" width="472" height="614" rx="6" fill="none" stroke="#3a6ea5" stroke-width="2.5" stroke-dasharray="8,4"/>
-    <!-- Red path drawn by JS to match button positions -->
+    <rect x="10" y="10" width="620" height="711" rx="6" fill="none" stroke="#3a6ea5" stroke-width="2.5" stroke-dasharray="8,4"/>
     <path id="flightPath" fill="none" stroke="#ff4444" stroke-width="2" stroke-dasharray="5,3" opacity="0.5"/>
     <defs><marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#ff4444" opacity="0.5"/></marker></defs>
   </svg>
-  <div class="route-label" style="left:69%;top:26%">起點 ▲</div>
-  <div class="route-label" style="left:67%;top:93%">終點 ▼</div>
+  <div class="route-label" style="left:62%;top:33%">起點 ▲</div>
+  <div class="route-label" style="left:60%;top:91%">終點 ▼</div>
   <div id="mapButtons"></div>
 </div>
 
@@ -160,31 +159,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
 const COLORS=['#2980b9','#e74c3c','#f1c40f','#27ae60'];
 
 const OBS=[
-  {id:'o1', name:'關卡1',  desc:'起點',           pts:5, x:69.0, y:26.0},
-  {id:'o2', name:'關卡2',  desc:'半圓(標靶1右)',   pts:5, x:21.0, y:34.7},
-  {id:'o3', name:'關卡3',  desc:'半圓(關卡2右)',   pts:5, x:30.0, y:34.7},
-  {id:'o4', name:'關卡4',  desc:'半圓(紅線上)',    pts:5, x:58.0, y:43.0},
-  {id:'o5', name:'關卡5',  desc:'橫向圓柱(左移)',  pts:5, x:38.0, y:63.0},
-  {id:'o6', name:'關卡6',  desc:'半圓+支架(左下)', pts:5, x:26.1, y:78.2},
-  {id:'o7', name:'關卡7',  desc:'半圓+支架(中下)', pts:5, x:45.1, y:79.2},
-  {id:'o8', name:'關卡8',  desc:'直立圓柱(左移)',  pts:5, x:68.0, y:79.0},
-  {id:'o9', name:'關卡9',  desc:'半圓(標靶4上方)', pts:5, x:48.3, y:86.0},
-  {id:'o10',name:'關卡10', desc:'角落上方',       pts:5, x:66.9, y:87.0},
+  {id:'o1', name:'關卡1',  desc:'起點',           pts:5, x:61.9, y:34.0},
+  {id:'o2', name:'關卡2',  desc:'半圓(標靶1右)',   pts:5, x:25.3, y:41.5},
+  {id:'o3', name:'關卡3',  desc:'半圓(關卡2右)',   pts:5, x:32.2, y:41.5},
+  {id:'o4', name:'關卡4',  desc:'半圓(紅線上)',    pts:5, x:53.5, y:48.7},
+  {id:'o5', name:'關卡5',  desc:'橫向圓柱(左移)',  pts:5, x:38.3, y:65.9},
+  {id:'o6', name:'關卡6',  desc:'半圓+支架(左下)', pts:5, x:29.2, y:79.1},
+  {id:'o7', name:'關卡7',  desc:'半圓+支架(中下)', pts:5, x:43.7, y:79.9},
+  {id:'o8', name:'關卡8',  desc:'直立圓柱(左移)',  pts:5, x:61.1, y:79.8},
+  {id:'o9', name:'關卡9',  desc:'半圓(標靶4上方)', pts:5, x:46.1, y:85.8},
+  {id:'o10',name:'關卡10', desc:'角落上方',       pts:5, x:60.3, y:86.7},
 ];
 
 const TGT=[
-  {id:'t1',name:'標靶1',desc:'左上',  pts:10, x:12.0, y:34.7},
-  {id:'t2',name:'標靶2',desc:'左中',  pts:10, x:24.4, y:65.8},
-  {id:'t3',name:'標靶3',desc:'左下',  pts:10, x:26.6, y:89.0},
-  {id:'t4',name:'標靶4',desc:'中下',  pts:10, x:48.3, y:93.0},
-  {id:'t5',name:'標靶5',desc:'中央',  pts:10, x:50.0, y:63.0},
-  {id:'t6',name:'標靶6',desc:'右上',  pts:10, x:82.3, y:44.3},
-  {id:'t7',name:'標靶7',desc:'右中',  pts:10, x:84.4, y:64.2},
+  {id:'t1',name:'標靶1',desc:'左上',  pts:10, x:18.5, y:41.5},
+  {id:'t2',name:'標靶2',desc:'左中',  pts:10, x:27.9, y:68.4},
+  {id:'t3',name:'標靶3',desc:'左下',  pts:10, x:29.6, y:88.4},
+  {id:'t4',name:'標靶4',desc:'中下',  pts:10, x:46.1, y:91.8},
+  {id:'t5',name:'標靶5',desc:'中央',  pts:10, x:47.4, y:65.9},
+  {id:'t6',name:'標靶6',desc:'右上',  pts:10, x:72.0, y:49.8},
+  {id:'t7',name:'標靶7',desc:'右中',  pts:10, x:73.6, y:67.0},
 ];
 
 const BON=[
-  {id:'b1',name:'終點H降落',desc:'成功降落',pts:10, x:66.9, y:94.0, shape:'heli'},
-  {id:'b2',name:'吹走杯子', desc:'灰色方塊',pts:10, x:58.6, y:78.0, shape:'cup'},
+  {id:'b1',name:'終點H降落',desc:'成功降落',pts:10, x:60.3, y:92.7, shape:'heli'},
+  {id:'b2',name:'吹走杯子', desc:'灰色方塊',pts:10, x:54.0, y:78.9, shape:'cup'},
 ];
 
 const ALL=[...OBS.map(o=>({...o,type:'obs'})),...TGT.map(t=>({...t,type:'tgt'})),...BON.map(b=>({...b,type:b.shape||'bon'}))];
@@ -266,21 +265,21 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 // Route order for the red flight path
 const ROUTE=[
-  {x:69.0,y:26.0},  // 起點 (關卡1)
-  {x:12.0,y:34.7},  // 標靶1
-  {x:21.0,y:34.7},  // 關卡2
-  {x:30.0,y:34.7},  // 關卡3
-  {x:58.0,y:43.0},  // 關卡4
-  {x:50.0,y:63.0},  // 標靶5
-  {x:38.0,y:63.0},  // 關卡5
-  {x:24.4,y:65.8},  // 標靶2
-  {x:26.1,y:78.2},  // 關卡6
-  {x:45.1,y:79.2},  // 關卡7
-  {x:58.6,y:78.0},  // 吹走杯子
-  {x:68.0,y:79.0},  // 關卡8
-  {x:48.3,y:86.0},  // 關卡9
-  {x:48.3,y:93.0},  // 標靶4
-  {x:66.9,y:94.0},  // 終點H降落
+  {x:61.9,y:34.0},  // 起點 (關卡1)
+  {x:18.5,y:41.5},  // 標靶1
+  {x:25.3,y:41.5},  // 關卡2
+  {x:32.2,y:41.5},  // 關卡3
+  {x:53.5,y:48.7},  // 關卡4
+  {x:47.4,y:65.9},  // 標靶5
+  {x:38.3,y:65.9},  // 關卡5
+  {x:27.9,y:68.4},  // 標靶2
+  {x:29.2,y:79.1},  // 關卡6
+  {x:43.7,y:79.9},  // 關卡7
+  {x:54.0,y:78.9},  // 吹走杯子
+  {x:61.1,y:79.8},  // 關卡8
+  {x:46.1,y:85.8},  // 關卡9
+  {x:46.1,y:91.8},  // 標靶4
+  {x:60.3,y:92.7},  // 終點H降落
 ];
 
 function drawPath(){
