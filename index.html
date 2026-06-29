@@ -26,7 +26,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
 .mname{background:transparent;border:none;border-bottom:1px dashed #556;color:inherit;font:inherit;font-size:11px;width:46px;outline:none}
 .mbade{background:var(--accent);color:#000;border-radius:8px;padding:0 4px;font-size:9px;font-weight:700;margin-left:2px}
 .timer-box{display:flex;align-items:center;gap:8px;margin-left:auto}
-.timer{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:2px;color:var(--green);min-width:95px;text-align:center}
+.timer{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:1px;color:var(--green);min-width:140px;text-align:center}
 .timer.warning{color:var(--orange)}.timer.danger{color:var(--red);animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.4}}
 .cur-score{font-size:18px;font-weight:700;color:var(--accent);white-space:nowrap}
@@ -102,7 +102,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
   .map-btn.tgt{width:34px;height:34px;font-size:7px}.map-btn.tgt .pts{font-size:12px}
   .map-btn.heli{width:42px;height:42px;font-size:8px}.map-btn.heli .pts{font-size:13px}
   .map-btn.cup{width:36px;height:36px;font-size:7px}.map-btn.cup .pts{font-size:12px}
-  .timer{font-size:24px;min-width:75px}.topbar h1{font-size:12px}
+  .timer{font-size:24px;min-width:120px}.topbar h1{font-size:12px}
 }
 </style>
 </head>
@@ -188,7 +188,7 @@ const BON=[
 const ALL=[...OBS.map(o=>({...o,type:'obs'})),...TGT.map(t=>({...t,type:'tgt'})),...BON.map(b=>({...b,type:b.shape||'bon'}))];
 
 let S=load()||{teams:['A 隊','B 隊','C 隊','D 隊'].map(n=>({name:n,members:[{name:'隊員1',sc:{}},{name:'隊員2',sc:{}},{name:'隊員3',sc:{}}]}))};
-let ci=0,mi=0,tSec=480,tRun=false,tInt=null;
+let ci=0,mi=0,tMs=480000,tRun=false,tInt=null;
 
 function save(){try{localStorage.setItem('drone_sc',JSON.stringify(S))}catch(e){}}
 function load(){try{const d=localStorage.getItem('drone_sc');return d?JSON.parse(d):null}catch(e){return null}}
@@ -228,10 +228,10 @@ function toggle(id,pts){
 }
 
 function toggleTimer(){if(tRun)pauseTimer();else startTimer()}
-function startTimer(){if(tRun)return;tRun=true;document.getElementById('timerBtn').textContent='⏸';tInt=setInterval(()=>{tSec--;if(tSec<=0){tSec=0;pauseTimer();showToast('⏰ 時間到！')}showTime()},1000);showTime()}
+function startTimer(){if(tRun)return;tRun=true;document.getElementById('timerBtn').textContent='⏸';const t0=performance.now()-((480000-tMs));tInt=setInterval(()=>{tMs=Math.max(0,480000-(performance.now()-t0));if(tMs<=0){tMs=0;pauseTimer();showToast('⏰ 時間到！')}showTime()},33);showTime()}
 function pauseTimer(){tRun=false;clearInterval(tInt);document.getElementById('timerBtn').textContent='▶'}
-function resetTimer(){pauseTimer();tSec=480;document.getElementById('timerBtn').textContent='▶';showTime()}
-function showTime(){const m=Math.floor(tSec/60),s=tSec%60;const el=document.getElementById('timer');el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;el.className='timer'+(tSec<=60?' danger':tSec<=120?' warning':'')}
+function resetTimer(){pauseTimer();tMs=480000;document.getElementById('timerBtn').textContent='▶';showTime()}
+function showTime(){const total=Math.ceil(tMs/1000);const m=Math.floor(total/60),s=total%60;const cs=Math.floor((tMs%1000)/10);const el=document.getElementById('timer');el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s+'.'+(cs<10?'0':'')+cs;el.className='timer'+(tMs<=60000?' danger':tMs<=120000?' warning':'')}
 
 function resetAll(){if(!confirm('確定重設全部？'))return;S={teams:['A 隊','B 隊','C 隊','D 隊'].map(n=>({name:n,members:[{name:'隊員1',sc:{}},{name:'隊員2',sc:{}},{name:'隊員3',sc:{}}]}))};ci=0;mi=0;resetTimer();save();render();showToast('已重設')}
 
