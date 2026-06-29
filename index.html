@@ -102,14 +102,6 @@
   .map-btn.cup .lbl{font-size:8px;margin-top:1px}
   .map-btn.cup.scored{background:rgba(180,180,180,.4);border-color:#ddd;color:#fff;box-shadow:0 0 14px rgba(180,180,180,.4)}
 
-  /* P markers (visual only, not scoring) */
-  .p-marker{
-    position:absolute;transform:translate(-50%,-50%);
-    width:36px;height:36px;border-radius:50%;border:2px solid var(--orange);
-    background:rgba(255,140,0,.08);color:var(--orange);
-    display:flex;align-items:center;justify-content:center;
-    font-size:16px;font-weight:800;pointer-events:none;z-index:5;opacity:.6;
-  }
 
   /* D markers (visual, already covered by tgt buttons) */
   /* Start/End labels */
@@ -205,12 +197,6 @@
     </defs>
   </svg>
 
-  <!-- P markers (visual waypoints, not scoring) -->
-  <div class="p-marker" style="left:31.3%;top:40.0%">P</div>
-  <div class="p-marker" style="left:42.3%;top:41.0%">P</div>
-  <div class="p-marker" style="left:52.3%;top:40.4%">P</div>
-  <div class="p-marker" style="left:51.4%;top:88.2%">P</div>
-
   <!-- Route labels -->
   <div class="route-label" style="left:69%;top:26%">起點 ▲</div>
   <div class="route-label" style="left:67%;top:100%">終點 ▼</div>
@@ -225,7 +211,6 @@
     <span><span class="legend-dot" style="background:var(--purple)"></span>標靶 10分×7</span>
     <span><span class="legend-dot circle" style="background:var(--green)"></span>H降落 10分</span>
     <span><span class="legend-dot" style="background:#aaa"></span>吹杯 10分</span>
-    <span><span class="legend-dot circle" style="background:var(--orange);opacity:.5"></span>P 路標</span>
   </div>
   <div class="lb-card">
     <div class="lb-hdr">🏆 排名 <button class="btn btn-o" style="padding:2px 7px;font-size:10px" onclick="showSummary()">詳細</button></div>
