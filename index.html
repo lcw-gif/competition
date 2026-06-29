@@ -38,7 +38,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
 .btn-r{background:var(--red)}
 .actions{display:flex;gap:5px}
 
-.map-wrap{position:relative;width:100%;max-width:750px;margin:10px auto;aspect-ratio:640/731}
+.map-wrap{position:relative;width:100%;max-width:750px;margin:10px auto;padding-bottom:60px;aspect-ratio:640/791}
 .map-canvas{position:absolute;inset:0;border:3px solid #3a6ea5;border-radius:8px;background:linear-gradient(180deg,#111d28,#0d1520)}
 .map-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 
@@ -132,7 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
     <defs><marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#ff4444" opacity="0.5"/></marker></defs>
   </svg>
   <div class="route-label" style="left:69%;top:26%">起點 ▲</div>
-  <div class="route-label" style="left:67%;top:100%">終點 ▼</div>
+  <div class="route-label" style="left:67%;top:93%">終點 ▼</div>
   <div id="mapButtons"></div>
 </div>
 
@@ -166,23 +166,23 @@ const OBS=[
   {id:'o6', name:'關卡6',  desc:'半圓+支架(左下)', pts:5, x:26.1, y:78.2},
   {id:'o7', name:'關卡7',  desc:'半圓+支架(中下)', pts:5, x:45.1, y:79.2},
   {id:'o8', name:'關卡8',  desc:'直立圓柱(左移)',  pts:5, x:68.0, y:79.0},
-  {id:'o9', name:'關卡9',  desc:'半圓(標靶4上方)', pts:5, x:48.3, y:92.0},
-  {id:'o10',name:'關卡10', desc:'角落上方',       pts:5, x:66.9, y:93.0},
+  {id:'o9', name:'關卡9',  desc:'半圓(標靶4上方)', pts:5, x:48.3, y:86.0},
+  {id:'o10',name:'關卡10', desc:'角落上方',       pts:5, x:66.9, y:87.0},
 ];
 
 const TGT=[
   {id:'t1',name:'標靶1',desc:'左上',  pts:10, x:12.0, y:34.7},
   {id:'t2',name:'標靶2',desc:'左中',  pts:10, x:24.4, y:65.8},
-  {id:'t3',name:'標靶3',desc:'左下',  pts:10, x:26.6, y:95.6},
-  {id:'t4',name:'標靶4',desc:'中下',  pts:10, x:48.3, y:101.8},
+  {id:'t3',name:'標靶3',desc:'左下',  pts:10, x:26.6, y:89.0},
+  {id:'t4',name:'標靶4',desc:'中下',  pts:10, x:48.3, y:93.0},
   {id:'t5',name:'標靶5',desc:'中央',  pts:10, x:50.0, y:63.0},
   {id:'t6',name:'標靶6',desc:'右上',  pts:10, x:82.3, y:44.3},
   {id:'t7',name:'標靶7',desc:'右中',  pts:10, x:84.4, y:64.2},
 ];
 
 const BON=[
-  {id:'b1',name:'終點H降落',desc:'成功降落',pts:10, x:66.9, y:102.0, shape:'heli'},
-  {id:'b2',name:'吹走杯子', desc:'灰色方塊',pts:10, x:58.6, y:82.0, shape:'cup'},
+  {id:'b1',name:'終點H降落',desc:'成功降落',pts:10, x:66.9, y:94.0, shape:'heli'},
+  {id:'b2',name:'吹走杯子', desc:'灰色方塊',pts:10, x:58.6, y:78.0, shape:'cup'},
 ];
 
 const ALL=[...OBS.map(o=>({...o,type:'obs'})),...TGT.map(t=>({...t,type:'tgt'})),...BON.map(b=>({...b,type:b.shape||'bon'}))];
