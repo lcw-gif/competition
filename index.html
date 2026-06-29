@@ -3,969 +3,412 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>樂善堂梁銶琚書院 - 無人機障礙賽計分系統</title>
+<title>無人機障礙賽計分系統</title>
 <style>
   :root {
-    --bg: #0f1923;
-    --card: #1a2736;
-    --card-hover: #223344;
-    --accent: #00d4ff;
-    --orange: #ff8c00;
-    --purple: #b366ff;
-    --green: #00e676;
-    --red: #ff4444;
-    --gold: #ffd700;
-    --silver: #c0c0c0;
-    --bronze: #cd7f32;
-    --text: #e8edf2;
-    --text-dim: #8899aa;
-    --border: #2a3a4a;
+    --bg: #0f1923; --card: #1a2736; --accent: #00d4ff;
+    --orange: #ff8c00; --purple: #b366ff; --green: #00e676;
+    --red: #ff4444; --gold: #ffd700; --silver: #c0c0c0; --bronze: #cd7f32;
+    --text: #e8edf2; --text-dim: #8899aa; --border: #2a3a4a;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+  /* ====== TOP BAR ====== */
+  .topbar {
+    background:linear-gradient(135deg,#1a2736,#0d1520); border-bottom:2px solid var(--accent);
+    padding:10px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; z-index:50;
   }
-  
-  /* Header */
-  .header {
-    background: linear-gradient(135deg, #1a2736, #0d1520);
-    border-bottom: 2px solid var(--accent);
-    padding: 12px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
+  .topbar h1 { font-size:16px; color:var(--accent); white-space:nowrap; }
+  .teams { display:flex; gap:6px; flex-wrap:wrap; }
+  .team-chip {
+    padding:6px 14px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;
+    border:2px solid transparent; transition:all .2s; display:flex; align-items:center; gap:6px;
   }
-  .header h1 {
-    font-size: 20px;
-    color: var(--accent);
-    letter-spacing: 1px;
+  .team-chip.active { transform:scale(1.05); box-shadow:0 2px 10px rgba(0,0,0,.3); }
+  .team-chip[data-t="0"]{background:#1e3a5f;border-color:#2980b9}
+  .team-chip[data-t="0"].active{background:#2980b9;color:#fff}
+  .team-chip[data-t="1"]{background:#3a1e5f;border-color:#8e44ad}
+  .team-chip[data-t="1"].active{background:#8e44ad;color:#fff}
+  .team-chip[data-t="2"]{background:#5f3a1e;border-color:#e67e22}
+  .team-chip[data-t="2"].active{background:#e67e22;color:#fff}
+  .team-chip[data-t="3"]{background:#1e5f3a;border-color:#27ae60}
+  .team-chip[data-t="3"].active{background:#27ae60;color:#fff}
+  .tname { background:transparent; border:none; border-bottom:1px dashed #556; color:inherit; font:inherit; font-size:13px; width:64px; text-align:center; outline:none; }
+  .tname:focus { border-bottom-color:var(--accent); }
+
+  .members { display:flex; gap:5px; }
+  .mchip {
+    padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer;
+    border:2px solid var(--border); background:var(--card); color:var(--text-dim); transition:all .2s;
   }
-  .header-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
+  .mchip.active { border-color:var(--accent); background:rgba(0,212,255,.1); color:var(--accent); font-weight:600; }
+  .mname { background:transparent; border:none; border-bottom:1px dashed #556; color:inherit; font:inherit; font-size:12px; width:52px; outline:none; }
+  .mbadge { background:var(--accent); color:#000; border-radius:8px; padding:0 5px; font-size:10px; font-weight:700; margin-left:3px; }
+
+  .timer-box { display:flex; align-items:center; gap:10px; margin-left:auto; }
+  .timer { font-size:36px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:2px; color:var(--green); min-width:110px; text-align:center; }
+  .timer.warning { color:var(--orange); }
+  .timer.danger { color:var(--red); animation:pulse 1s infinite; }
+  @keyframes pulse { 50%{opacity:.4} }
+  .cur-score { font-size:20px; font-weight:700; color:var(--accent); white-space:nowrap; }
+  .btn { padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; color:#fff; }
+  .btn:hover { filter:brightness(1.15); }
+  .btn-g { background:var(--green); color:#000; }
+  .btn-o { background:transparent; border:1px solid var(--border); color:var(--text-dim); }
+  .btn-o:hover { border-color:var(--accent); color:var(--accent); }
+  .btn-r { background:var(--red); }
+
+  .actions { display:flex; gap:6px; }
+  .topbar-right { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+  /* ====== MAP AREA ====== */
+  .map-wrap {
+    position:relative; width:100%; max-width:900px; margin:12px auto; aspect-ratio:7/8;
+    /* This maintains the whiteboard aspect ratio */
   }
-  .btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: white;
+  .map-canvas {
+    position:absolute; inset:0; border:3px solid #3a6ea5; border-radius:8px;
+    background:linear-gradient(180deg, #111d28 0%, #0d1520 100%);
   }
-  .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
-  .btn:active { transform: translateY(0); }
-  .btn-primary { background: var(--accent); color: #000; }
-  .btn-danger { background: var(--red); }
-  .btn-success { background: var(--green); color: #000; }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
+
+  /* SVG path overlay */
+  .map-svg {
+    position:absolute; inset:0; width:100%; height:100%; pointer-events:none;
   }
-  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-sm { padding: 5px 10px; font-size: 12px; }
-  
-  /* Main Layout */
-  .main {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 0;
-    min-height: calc(100vh - 60px);
+
+  /* Scoring buttons on map */
+  .map-btn {
+    position:absolute; transform:translate(-50%,-50%);
+    width:56px; height:56px; border-radius:50%; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:10px; font-weight:700; transition:all .25s; user-select:none;
+    border:2px solid; z-index:10; line-height:1.1;
   }
-  @media (max-width: 900px) {
-    .main { grid-template-columns: 1fr; }
+  .map-btn:hover { transform:translate(-50%,-50%) scale(1.15); z-index:20; }
+  .map-btn .pts { font-size:16px; font-weight:800; }
+  .map-btn .lbl { font-size:9px; opacity:.8; margin-top:1px; }
+
+  /* Obstacle buttons (orange) */
+  .map-btn.obs {
+    background:rgba(255,140,0,.15); border-color:var(--orange); color:var(--orange);
   }
-  
-  /* Scoring Panel */
-  .scoring-panel {
-    padding: 16px 20px;
-    overflow-y: auto;
+  .map-btn.obs.scored {
+    background:rgba(255,140,0,.5); border-color:#ffa500; color:#fff;
+    box-shadow:0 0 16px rgba(255,140,0,.5);
   }
-  
-  /* Team/Member Selector */
-  .selector-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    align-items: center;
+  /* Target buttons (purple) */
+  .map-btn.tgt {
+    background:rgba(179,102,255,.15); border-color:var(--purple); color:var(--purple);
   }
-  .team-btn {
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 2px solid transparent;
-    min-width: 100px;
-    text-align: center;
+  .map-btn.tgt.scored {
+    background:rgba(179,102,255,.5); border-color:#c77dff; color:#fff;
+    box-shadow:0 0 16px rgba(179,102,255,.5);
   }
-  .team-btn.active { transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-  .team-btn[data-team="0"] { background: #1e3a5f; border-color: #2980b9; }
-  .team-btn[data-team="0"].active { background: #2980b9; color: white; }
-  .team-btn[data-team="1"] { background: #3a1e5f; border-color: #8e44ad; }
-  .team-btn[data-team="1"].active { background: #8e44ad; color: white; }
-  .team-btn[data-team="2"] { background: #5f3a1e; border-color: #e67e22; }
-  .team-btn[data-team="2"].active { background: #e67e22; color: white; }
-  .team-btn[data-team="3"] { background: #1e5f3a; border-color: #27ae60; }
-  .team-btn[data-team="3"].active { background: #27ae60; color: white; }
-  
-  .member-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
+  /* Bonus buttons (green) */
+  .map-btn.bon {
+    background:rgba(0,230,118,.15); border-color:var(--green); color:var(--green);
   }
-  .member-btn {
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 2px solid var(--border);
-    background: var(--card);
-    color: var(--text-dim);
+  .map-btn.bon.scored {
+    background:rgba(0,230,118,.5); border-color:#69f0ae; color:#fff;
+    box-shadow:0 0 16px rgba(0,230,118,.5);
   }
-  .member-btn.active {
-    border-color: var(--accent);
-    background: rgba(0,212,255,0.1);
-    color: var(--accent);
-    font-weight: 600;
+  .map-btn .check {
+    display:none; position:absolute; top:-4px; right:-4px; width:20px; height:20px;
+    background:var(--green); border-radius:50%; align-items:center; justify-content:center;
+    font-size:12px; color:#000; font-weight:bold;
   }
-  .member-btn .score-badge {
-    display: inline-block;
-    background: var(--accent);
-    color: #000;
-    border-radius: 10px;
-    padding: 1px 7px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-left: 5px;
+  .map-btn.scored .check { display:flex; }
+
+  /* ====== LEGEND + SIDEBAR ====== */
+  .bottom-bar {
+    display:flex; gap:12px; max-width:900px; margin:0 auto 16px; padding:0 12px; flex-wrap:wrap;
   }
-  
-  /* Timer */
-  .timer-section {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
-    padding: 14px 18px;
-    background: var(--card);
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    flex-wrap: wrap;
+  .legend {
+    display:flex; gap:16px; align-items:center; padding:8px 16px;
+    background:var(--card); border-radius:8px; border:1px solid var(--border); font-size:12px;
   }
-  .timer-display {
-    font-size: 48px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 2px;
-    color: var(--green);
-    min-width: 180px;
-    text-align: center;
-  }
-  .timer-display.warning { color: var(--orange); }
-  .timer-display.danger { color: var(--red); animation: pulse 1s ease-in-out infinite; }
-  @keyframes pulse { 50% { opacity: 0.5; } }
-  .timer-info {
-    flex: 1;
-    min-width: 150px;
-  }
-  .timer-info .current-player {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .timer-info .score-display {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  .timer-controls {
-    display: flex;
-    gap: 8px;
-  }
-  
-  /* Scoring Grid */
-  .scoring-section-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-dim);
-    margin: 16px 0 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .scoring-section-title .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  .scoring-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  .score-btn {
-    position: relative;
-    padding: 14px 10px;
-    border-radius: 12px;
-    border: 2px solid var(--border);
-    background: var(--card);
-    cursor: pointer;
-    transition: all 0.25s;
-    text-align: center;
-    user-select: none;
-  }
-  .score-btn:hover {
-    border-color: #556;
-    background: var(--card-hover);
-  }
-  .score-btn.scored {
-    border-color: var(--green);
-    background: rgba(0,230,118,0.12);
-  }
-  .score-btn.scored .btn-check {
-    display: flex;
-  }
-  .btn-check {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
-    background: var(--green);
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: #000;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,230,118,0.4);
-  }
-  .score-btn .btn-label {
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .score-btn .btn-points {
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-  .score-btn .btn-pts-value {
-    font-size: 20px;
-    font-weight: 700;
-  }
-  .score-btn.type-obstacle { border-left: 3px solid var(--orange); }
-  .score-btn.type-obstacle .btn-pts-value { color: var(--orange); }
-  .score-btn.type-target { border-left: 3px solid var(--purple); }
-  .score-btn.type-target .btn-pts-value { color: var(--purple); }
-  .score-btn.type-bonus { border-left: 3px solid var(--green); }
-  .score-btn.type-bonus .btn-pts-value { color: var(--green); }
-  .score-btn.scored.type-obstacle { background: rgba(255,140,0,0.12); border-color: var(--orange); }
-  .score-btn.scored.type-target { background: rgba(179,102,255,0.12); border-color: var(--purple); }
-  .score-btn.scored.type-bonus { background: rgba(0,230,118,0.12); }
-  .score-btn.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-  
-  /* Sidebar */
-  .sidebar {
-    background: #141f2b;
-    border-left: 1px solid var(--border);
-    padding: 16px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .sidebar-card {
-    background: var(--card);
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .sidebar-card-header {
-    padding: 10px 14px;
-    font-size: 14px;
-    font-weight: 700;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  /* Leaderboard */
-  .leaderboard-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    transition: background 0.2s;
-  }
-  .leaderboard-item:last-child { border-bottom: none; }
-  .leaderboard-item:hover { background: rgba(255,255,255,0.03); }
-  .rank-badge {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 700;
-    margin-right: 10px;
-    flex-shrink: 0;
-  }
-  .rank-1 { background: var(--gold); color: #000; }
-  .rank-2 { background: var(--silver); color: #000; }
-  .rank-3 { background: var(--bronze); color: #000; }
-  .rank-4 { background: var(--border); color: var(--text-dim); }
-  .leaderboard-team { flex: 1; font-weight: 600; font-size: 14px; }
-  .leaderboard-score {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--accent);
-    font-variant-numeric: tabular-nums;
-  }
-  .leaderboard-avg {
-    font-size: 11px;
-    color: var(--text-dim);
-    text-align: right;
-    margin-left: 8px;
-  }
-  
-  /* Member list in sidebar */
-  .member-detail {
-    padding: 8px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .member-detail:last-child { border-bottom: none; }
-  .member-detail-name { font-size: 13px; }
-  .member-detail-score {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  .member-detail-status {
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-  .member-detail .done { color: var(--green); }
-  .member-detail .playing { color: var(--orange); animation: pulse 1s infinite; }
-  
-  /* Detail view */
-  .detail-toggle {
-    font-size: 12px;
-    color: var(--accent);
-    cursor: pointer;
-    border: none;
-    background: none;
-    text-decoration: underline;
-  }
-  
-  /* Progress bar */
-  .progress-bar {
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    margin: 6px 14px 10px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--orange), var(--accent));
-    border-radius: 2px;
-    transition: width 0.3s;
-  }
-  
-  /* Summary modal */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--card);
-    border-radius: 16px;
-    border: 2px solid var(--accent);
-    padding: 24px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-  .modal h2 {
-    color: var(--accent);
-    margin-bottom: 16px;
-    text-align: center;
-  }
-  .modal table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 12px 0;
-  }
-  .modal th, .modal td {
-    padding: 8px 12px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }
-  .modal th {
-    color: var(--text-dim);
-    font-weight: 600;
-    font-size: 12px;
-  }
-  .modal .champion {
-    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
-  }
-  .modal .champion td:first-child::before {
-    content: '🏆 ';
-  }
-  .modal-close {
-    display: block;
-    margin: 16px auto 0;
-  }
-  
-  /* Editable team names */
-  .team-name-input {
-    background: transparent;
-    border: none;
-    border-bottom: 1px dashed var(--border);
-    color: inherit;
-    font: inherit;
-    font-size: 14px;
-    width: 80px;
-    text-align: center;
-    outline: none;
-    padding: 2px;
-  }
-  .team-name-input:focus { border-bottom-color: var(--accent); }
-  
-  /* Member name inputs */
-  .member-name-input {
-    background: transparent;
-    border: none;
-    border-bottom: 1px dashed var(--border);
-    color: inherit;
-    font: inherit;
-    font-size: 13px;
-    width: 70px;
-    outline: none;
-    padding: 1px;
-  }
-  .member-name-input:focus { border-bottom-color: var(--accent); }
-  
-  /* Toast */
+  .legend-dot { width:12px; height:12px; border-radius:50%; display:inline-block; margin-right:4px; }
+
+  .lb-card { flex:1; min-width:260px; background:var(--card); border-radius:10px; border:1px solid var(--border); overflow:hidden; }
+  .lb-hdr { padding:8px 12px; font-size:13px; font-weight:700; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; }
+  .lb-row { display:flex; align-items:center; padding:7px 12px; border-bottom:1px solid rgba(255,255,255,.04); }
+  .lb-row:last-child { border-bottom:none; }
+  .rank { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; margin-right:8px; flex-shrink:0; }
+  .rank-1{background:var(--gold);color:#000} .rank-2{background:var(--silver);color:#000}
+  .rank-3{background:var(--bronze);color:#000} .rank-4{background:var(--border);color:var(--text-dim)}
+  .lb-name { flex:1; font-weight:600; font-size:13px; }
+  .lb-score { font-size:18px; font-weight:700; color:var(--accent); }
+  .lb-avg { font-size:10px; color:var(--text-dim); text-align:right; margin-left:6px; }
+
+  /* ====== MODAL ====== */
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:100; align-items:center; justify-content:center; }
+  .modal-bg.show { display:flex; }
+  .modal { background:var(--card); border-radius:14px; border:2px solid var(--accent); padding:20px; max-width:620px; width:92%; max-height:80vh; overflow-y:auto; }
+  .modal h2 { color:var(--accent); margin-bottom:12px; text-align:center; font-size:18px; }
+  .modal table { width:100%; border-collapse:collapse; margin:10px 0; }
+  .modal th,.modal td { padding:6px 8px; text-align:center; border-bottom:1px solid var(--border); font-size:13px; }
+  .modal th { color:var(--text-dim); font-weight:600; font-size:11px; }
+  .modal .champ { background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,215,0,.05)); }
+  .modal .champ td:first-child::before { content:'🏆 '; }
+
   .toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--card);
-    border: 1px solid var(--accent);
-    color: var(--text);
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 200;
-    transition: transform 0.3s;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    position:fixed; bottom:16px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:var(--card); border:1px solid var(--accent); color:var(--text);
+    padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600;
+    z-index:200; transition:transform .3s; box-shadow:0 4px 16px rgba(0,0,0,.4);
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  @media(max-width:600px){
+    .map-btn { width:44px; height:44px; }
+    .map-btn .pts { font-size:13px; }
+    .map-btn .lbl { font-size:7px; }
+    .timer { font-size:28px; min-width:85px; }
+    .topbar h1 { font-size:13px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-  <h1>🚁 無人機障礙賽計分系統</h1>
-  <div class="header-controls">
-    <button class="btn btn-outline btn-sm" onclick="exportData()">📋 匯出數據</button>
-    <button class="btn btn-outline btn-sm" onclick="showSummary()">📊 總結</button>
-    <button class="btn btn-danger btn-sm" onclick="resetAll()">🔄 重設全部</button>
-  </div>
-</div>
-
-<!-- Main -->
-<div class="main">
-  <!-- Scoring Panel -->
-  <div class="scoring-panel">
-    <!-- Team Selector -->
-    <div class="selector-bar" id="teamSelector"></div>
-    
-    <!-- Member Selector -->
-    <div class="member-bar" id="memberSelector"></div>
-    
-    <!-- Timer + Current Score -->
-    <div class="timer-section">
-      <div class="timer-controls">
-        <button class="btn btn-success" id="timerStartBtn" onclick="toggleTimer()">▶ 開始計時</button>
-        <button class="btn btn-outline btn-sm" onclick="resetTimer()">重設</button>
-      </div>
-      <div class="timer-display" id="timerDisplay">08:00</div>
-      <div class="timer-info">
-        <div class="current-player" id="currentPlayerLabel">請選擇隊員</div>
-        <div class="score-display" id="currentScoreDisplay">得分：<span id="currentScore">0</span> / 140</div>
-      </div>
+<!-- TOP BAR: teams, members, timer -->
+<div class="topbar">
+  <h1>🚁 無人機障礙賽</h1>
+  <div class="teams" id="teams"></div>
+  <div class="members" id="members"></div>
+  <div class="topbar-right">
+    <div class="timer-box">
+      <button class="btn btn-g" id="timerBtn" onclick="toggleTimer()">▶ 開始</button>
+      <div class="timer" id="timer">08:00</div>
+      <div class="cur-score"><span id="curScore">0</span> / 140</div>
     </div>
-    
-    <!-- Obstacles (10 × 5pts) -->
-    <div class="scoring-section-title">
-      <span class="dot" style="background:var(--orange)"></span>
-      橙色關卡（10 個 × 5 分 = 50 分）
-    </div>
-    <div class="scoring-grid" id="obstacleGrid"></div>
-    
-    <!-- Targets (7 × 10pts) -->
-    <div class="scoring-section-title">
-      <span class="dot" style="background:var(--purple)"></span>
-      紫色標靶（7 個 × 10 分 = 70 分）
-    </div>
-    <div class="scoring-grid" id="targetGrid"></div>
-    
-    <!-- Bonus -->
-    <div class="scoring-section-title">
-      <span class="dot" style="background:var(--green)"></span>
-      額外得分
-    </div>
-    <div class="scoring-grid" id="bonusGrid"></div>
-  </div>
-  
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <!-- Leaderboard -->
-    <div class="sidebar-card">
-      <div class="sidebar-card-header">
-        🏆 隊伍排名
-        <button class="detail-toggle" onclick="showSummary()">詳細</button>
-      </div>
-      <div id="leaderboard"></div>
-    </div>
-    
-    <!-- Current Team Detail -->
-    <div class="sidebar-card">
-      <div class="sidebar-card-header">
-        👥 <span id="sidebarTeamName">隊伍詳情</span>
-      </div>
-      <div id="teamDetail"></div>
-    </div>
-    
-    <!-- All teams quick view -->
-    <div class="sidebar-card">
-      <div class="sidebar-card-header">📋 所有隊員</div>
-      <div id="allTeamsView"></div>
+    <div class="actions">
+      <button class="btn btn-o" onclick="showSummary()">📊</button>
+      <button class="btn btn-o" onclick="exportCSV()">📋</button>
+      <button class="btn btn-r" onclick="resetAll()">🔄</button>
     </div>
   </div>
 </div>
 
-<!-- Summary Modal -->
-<div class="modal-overlay" id="summaryModal">
-  <div class="modal">
-    <h2>🏆 比賽結果總結</h2>
-    <div id="summaryContent"></div>
-    <button class="btn btn-primary modal-close" onclick="closeSummary()">關閉</button>
+<!-- MAP -->
+<div class="map-wrap" id="mapWrap">
+  <div class="map-canvas"></div>
+
+  <!-- SVG: course boundary + flight path -->
+  <svg class="map-svg" viewBox="0 0 700 800" preserveAspectRatio="xMidYMid meet">
+    <!-- Course boundary (blue rectangle) -->
+    <rect x="80" y="120" width="540" height="600" rx="8" fill="none" stroke="#3a6ea5" stroke-width="3" stroke-dasharray="8,4"/>
+    <!-- Flight path (red curved arrows) -->
+    <path d="M 130 170 C 130 170, 160 250, 200 280 C 240 310, 280 290, 310 300
+             C 340 310, 360 430, 390 480 C 420 530, 350 540, 300 530
+             C 250 520, 220 540, 200 570 C 180 600, 180 640, 200 670
+             C 220 700, 280 700, 300 700 C 320 700, 400 680, 430 650
+             C 460 620, 470 590, 470 560 C 470 530, 470 500, 460 480
+             C 450 460, 500 420, 510 380 C 520 340, 520 300, 500 260
+             C 480 220, 440 200, 420 190"
+          fill="none" stroke="#ff4444" stroke-width="2.5" stroke-dasharray="6,3" opacity="0.6"
+          marker-end="url(#arrow)"/>
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#ff4444" opacity="0.6"/>
+      </marker>
+    </defs>
+    <!-- Start/End markers -->
+    <text x="100" y="160" fill="#ff69b4" font-size="18" font-weight="bold">D</text>
+    <text x="410" y="180" fill="#ff69b4" font-size="18" font-weight="bold">D</text>
+    <rect x="88" y="140" width="24" height="24" rx="3" fill="none" stroke="#ff69b4" stroke-width="2"/>
+    <rect x="400" y="162" width="24" height="24" rx="3" fill="none" stroke="#ff69b4" stroke-width="2"/>
+  </svg>
+
+  <!-- Scoring buttons will be injected here by JS -->
+  <div id="mapButtons"></div>
+</div>
+
+<!-- BOTTOM: legend + leaderboard -->
+<div class="bottom-bar">
+  <div class="legend">
+    <span><span class="legend-dot" style="background:var(--orange)"></span>關卡 5 分</span>
+    <span><span class="legend-dot" style="background:var(--purple)"></span>標靶 10 分</span>
+    <span><span class="legend-dot" style="background:var(--green)"></span>額外 10 分</span>
+    <span><span class="legend-dot" style="background:#ff69b4"></span>起點 / 終點</span>
+  </div>
+  <div class="lb-card">
+    <div class="lb-hdr">🏆 隊伍排名 <button class="btn btn-o" style="padding:2px 8px;font-size:11px" onclick="showSummary()">詳細</button></div>
+    <div id="leaderboard"></div>
   </div>
 </div>
 
-<!-- Toast -->
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ===================== DATA =====================
-const TEAM_COLORS = ['#2980b9', '#8e44ad', '#e67e22', '#27ae60'];
-const TEAM_DEFAULTS = ['A 隊', 'B 隊', 'C 隊', 'D 隊'];
+// ======== DATA ========
+const COLORS = ['#2980b9','#8e44ad','#e67e22','#27ae60'];
 
-const OBSTACLES = [
-  { id: 'obs1',  name: '關卡 1', desc: '起點停機坪', pts: 5 },
-  { id: 'obs2',  name: '關卡 2', desc: '第一個繞柱', pts: 5 },
-  { id: 'obs3',  name: '關卡 3', desc: '穿越圓環', pts: 5 },
-  { id: 'obs4',  name: '關卡 4', desc: 'H 停機坪（上）', pts: 5 },
-  { id: 'obs5',  name: '關卡 5', desc: '繞過障礙柱', pts: 5 },
-  { id: 'obs6',  name: '關卡 6', desc: '低飛橫杆', pts: 5 },
-  { id: 'obs7',  name: '關卡 7', desc: '繞柱降落點', pts: 5 },
-  { id: 'obs8',  name: '關卡 8', desc: '疊塔繞行', pts: 5 },
-  { id: 'obs9',  name: '關卡 9', desc: '漏斗穿越', pts: 5 },
-  { id: 'obs10', name: '關卡 10', desc: '直升機障礙', pts: 5 },
-];
+// All scoring points with map positions (percentage of container)
+// Positions calibrated from the whiteboard photo
+const POINTS = [
+  // Orange obstacles (10 × 5pts) — positions from photo analysis
+  {id:'o1',  type:'obs', name:'關卡1',  desc:'起點停機坪',   pts:5, x:29, y:36},
+  {id:'o2',  type:'obs', name:'關卡2',  desc:'第一繞柱',     pts:5, x:43, y:38},
+  {id:'o3',  type:'obs', name:'關卡3',  desc:'穿越圓環',     pts:5, x:55, y:60},
+  {id:'o4',  type:'obs', name:'關卡4',  desc:'H停機坪(上)',  pts:5, x:70, y:47},
+  {id:'o5',  type:'obs', name:'關卡5',  desc:'繞過障礙柱',   pts:5, x:30, y:60},
+  {id:'o6',  type:'obs', name:'關卡6',  desc:'低飛橫杆',     pts:5, x:27, y:72},
+  {id:'o7',  type:'obs', name:'關卡7',  desc:'繞柱降落點',   pts:5, x:42, y:72},
+  {id:'o8',  type:'obs', name:'關卡8',  desc:'疊塔繞行',     pts:5, x:66, y:71},
+  {id:'o9',  type:'obs', name:'關卡9',  desc:'漏斗穿越',     pts:5, x:66, y:88},
+  {id:'o10', type:'obs', name:'關卡10', desc:'直升機障礙',   pts:5, x:60, y:25},
 
-const TARGETS = [
-  { id: 'tgt1', name: '標靶 1', desc: '左上角', pts: 10 },
-  { id: 'tgt2', name: '標靶 2', desc: '左中', pts: 10 },
-  { id: 'tgt3', name: '標靶 3', desc: '左下角', pts: 10 },
-  { id: 'tgt4', name: '標靶 4', desc: '中央偏左', pts: 10 },
-  { id: 'tgt5', name: '標靶 5', desc: '中下', pts: 10 },
-  { id: 'tgt6', name: '標靶 6', desc: '右上', pts: 10 },
-  { id: 'tgt7', name: '標靶 7', desc: '右中', pts: 10 },
-];
+  // Purple targets (7 × 10pts)
+  {id:'t1', type:'tgt', name:'標靶1', desc:'左上角',   pts:10, x:20, y:32},
+  {id:'t2', type:'tgt', name:'標靶2', desc:'左中',     pts:10, x:23, y:57},
+  {id:'t3', type:'tgt', name:'標靶3', desc:'左下角',   pts:10, x:24, y:83},
+  {id:'t4', type:'tgt', name:'標靶4', desc:'中央偏左', pts:10, x:42, y:55},
+  {id:'t5', type:'tgt', name:'標靶5', desc:'中下',     pts:10, x:42, y:88},
+  {id:'t6', type:'tgt', name:'標靶6', desc:'右上',     pts:10, x:78, y:36},
+  {id:'t7', type:'tgt', name:'標靶7', desc:'右中',     pts:10, x:77, y:52},
 
-const BONUSES = [
-  { id: 'bonus_h',    name: '終點 H 降落', desc: '成功降落 +10', pts: 10, type: 'bonus' },
-  { id: 'bonus_cup',  name: '吹走杯子', desc: '成功吹走 +10', pts: 10, type: 'bonus' },
+  // Bonus
+  {id:'b1', type:'bon', name:'終點H降落', desc:'成功降落', pts:10, x:60, y:25},
+  {id:'b2', type:'bon', name:'吹走杯子',  desc:'成功吹走', pts:10, x:56, y:32},
 ];
 
 // State
-let state = loadState() || getDefaultState();
-let currentTeam = 0;
-let currentMember = 0;
-let timerInterval = null;
-let timerSeconds = 8 * 60;
-let timerRunning = false;
+let S = load() || {teams:['A 隊','B 隊','C 隊','D 隊'].map(n=>({name:n, members:[{name:'隊員1',sc:{}},{name:'隊員2',sc:{}},{name:'隊員3',sc:{}}]}))};
+let ci = 0, mi = 0; // current team/member index
+let tSec = 480, tRun = false, tInt = null;
 
-function getDefaultState() {
-  return {
-    teams: TEAM_DEFAULTS.map((name, i) => ({
-      name,
-      members: [0,1,2].map(j => ({ name: `隊員${j+1}`, scores: {} }))
-    }))
-  };
+function save(){ try{localStorage.setItem('drone_sc',JSON.stringify(S))}catch(e){} }
+function load(){ try{const d=localStorage.getItem('drone_sc');return d?JSON.parse(d):null}catch(e){return null} }
+function mScore(m){ return Object.values(m.sc||{}).reduce((a,b)=>a+b,0) }
+
+// ======== RENDER ========
+function render(){
+  renderTeams(); renderMembers(); renderMapButtons(); renderLB();
+  document.getElementById('curScore').textContent = mScore(S.teams[ci].members[mi]);
 }
 
-function saveState() {
-  try { localStorage.setItem('drone_competition', JSON.stringify(state)); } catch(e) {}
+function renderTeams(){
+  document.getElementById('teams').innerHTML = S.teams.map((t,i)=>
+    `<div class="team-chip ${i===ci?'active':''}" data-t="${i}" onclick="pickTeam(${i})">
+      <input class="tname" value="${t.name}" onclick="event.stopPropagation()" onchange="S.teams[${i}].name=this.value;save();render()" maxlength="10">
+    </div>`).join('');
 }
 
-function loadState() {
-  try {
-    const d = localStorage.getItem('drone_competition');
-    return d ? JSON.parse(d) : null;
-  } catch(e) { return null; }
+function renderMembers(){
+  document.getElementById('members').innerHTML = S.teams[ci].members.map((m,i)=>
+    `<div class="mchip ${i===mi?'active':''}" onclick="pickMember(${i})">
+      <input class="mname" value="${m.name}" onclick="event.stopPropagation()" onchange="S.teams[ci].members[${i}].name=this.value;save();render()" maxlength="8">
+      <span class="mbadge">${mScore(m)}</span>
+    </div>`).join('');
 }
 
-// ===================== RENDER =====================
-function render() {
-  renderTeamSelector();
-  renderMemberSelector();
-  renderScoringButtons();
-  renderLeaderboard();
-  renderTeamDetail();
-  renderAllTeams();
-  updateCurrentScore();
-}
-
-function renderTeamSelector() {
-  const c = document.getElementById('teamSelector');
-  c.innerHTML = state.teams.map((t, i) => `
-    <div class="team-btn ${i===currentTeam?'active':''}" data-team="${i}" onclick="selectTeam(${i})">
-      <input class="team-name-input" value="${t.name}" 
-        onclick="event.stopPropagation()" 
-        onchange="state.teams[${i}].name=this.value;saveState();render()"
-        maxlength="10">
-    </div>
-  `).join('');
-}
-
-function renderMemberSelector() {
-  const c = document.getElementById('memberSelector');
-  const team = state.teams[currentTeam];
-  c.innerHTML = team.members.map((m, i) => {
-    const s = calcMemberScore(m);
-    return `<button class="member-btn ${i===currentMember?'active':''}" onclick="selectMember(${i})">
-      <input class="member-name-input" value="${m.name}"
-        onclick="event.stopPropagation()"
-        onchange="state.teams[${currentTeam}].members[${i}].name=this.value;saveState();render()"
-        maxlength="8">
-      <span class="score-badge">${s}</span>
-    </button>`;
+function renderMapButtons(){
+  const c = document.getElementById('mapButtons');
+  const m = S.teams[ci].members[mi];
+  c.innerHTML = POINTS.map(p => {
+    const scored = m.sc[p.id] ? 'scored' : '';
+    return `<div class="map-btn ${p.type} ${scored}" style="left:${p.x}%;top:${p.y}%" onclick="toggle('${p.id}',${p.pts})" title="${p.desc}">
+      <div class="check">✓</div>
+      <span class="pts">${p.pts}</span>
+      <span class="lbl">${p.name}</span>
+    </div>`;
   }).join('');
 }
 
-function renderScoringButtons() {
-  const member = state.teams[currentTeam].members[currentMember];
-  
-  // Obstacles
-  const og = document.getElementById('obstacleGrid');
-  og.innerHTML = OBSTACLES.map(o => `
-    <div class="score-btn type-obstacle ${member.scores[o.id]?'scored':''}" 
-         onclick="toggleScore('${o.id}', ${o.pts})">
-      <div class="btn-check">✓</div>
-      <div class="btn-label">${o.name}</div>
-      <div class="btn-pts-value">${o.pts} 分</div>
-      <div class="btn-points">${o.desc}</div>
+function renderLB(){
+  const ranked = S.teams.map((t,i)=>({i, name:t.name,
+    total:t.members.reduce((s,m)=>s+mScore(m),0)})).sort((a,b)=>b.total-a.total);
+  document.getElementById('leaderboard').innerHTML = ranked.map((r,i)=>
+    `<div class="lb-row"><div class="rank rank-${i+1}">${i+1}</div>
+     <div class="lb-name" style="color:${COLORS[r.i]}">${r.name}</div>
+     <div class="lb-score">${r.total}</div>
+     <div class="lb-avg">均 ${(r.total/3).toFixed(1)}</div></div>`).join('');
+}
+
+// ======== LOGIC ========
+function pickTeam(i){ ci=i; mi=0; resetTimer(); render(); }
+function pickMember(i){ mi=i; resetTimer(); render(); }
+
+function toggle(id, pts){
+  const m = S.teams[ci].members[mi];
+  if(m.sc[id]) delete m.sc[id]; else m.sc[id]=pts;
+  save(); render();
+  showToast(`${m.name}：${mScore(m)} / 140`);
+}
+
+// ======== TIMER ========
+function toggleTimer(){
+  if(tRun) pauseTimer(); else startTimer();
+}
+function startTimer(){
+  if(tRun) return; tRun=true;
+  document.getElementById('timerBtn').textContent='⏸';
+  tInt = setInterval(()=>{
+    tSec--; if(tSec<=0){ tSec=0; pauseTimer(); showToast('⏰ 時間到！'); }
+    showTime();
+  },1000); showTime();
+}
+function pauseTimer(){ tRun=false; clearInterval(tInt); document.getElementById('timerBtn').textContent='▶'; }
+function resetTimer(){ pauseTimer(); tSec=480; document.getElementById('timerBtn').textContent='▶ 開始'; showTime(); }
+function showTime(){
+  const m=Math.floor(tSec/60), s=tSec%60;
+  const el=document.getElementById('timer');
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className='timer'+(tSec<=60?' danger':tSec<=120?' warning':'');
+}
+
+// ======== ACTIONS ========
+function resetAll(){
+  if(!confirm('確定重設全部？')) return;
+  S = {teams:['A 隊','B 隊','C 隊','D 隊'].map(n=>({name:n, members:[{name:'隊員1',sc:{}},{name:'隊員2',sc:{}},{name:'隊員3',sc:{}}]}))};
+  ci=0; mi=0; resetTimer(); save(); render(); toast('已重設');
+}
+
+function showSummary(){
+  const ranked = S.teams.map((t,i)=>({i, name:t.name,
+    members:t.members.map(m=>({name:m.name, score:mScore(m)})),
+    total:t.members.reduce((s,m)=>s+mScore(m),0)})).sort((a,b)=>b.total-a.total);
+  document.getElementById('modalContent').innerHTML = `
+    <h2>🏆 比賽結果</h2>
+    <table><tr><th>名次</th><th>隊伍</th><th>隊員1</th><th>隊員2</th><th>隊員3</th><th>總分</th><th>平均</th></tr>
+    ${ranked.map((r,i)=>`<tr class="${i===0?'champ':''}">
+      <td>${['🥇','🥈','🥉','④'][i]}</td>
+      <td style="color:${COLORS[r.i]};font-weight:700">${r.name}</td>
+      ${r.members.map(m=>`<td>${m.name}<br><b>${m.score}</b></td>`).join('')}
+      <td style="font-size:18px;font-weight:700;color:var(--accent)">${r.total}</td>
+      <td style="color:var(--text-dim)">${(r.total/3).toFixed(1)}</td>
+    </tr>`).join('')}</table>
+    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--text-dim)">
+      每人最高 140 分 ｜ 關卡 50 + 標靶 70 + H降落 10 + 吹杯 10<br>墜機則原地起飛，不扣分
     </div>
-  `).join('');
-  
-  // Targets
-  const tg = document.getElementById('targetGrid');
-  tg.innerHTML = TARGETS.map(t => `
-    <div class="score-btn type-target ${member.scores[t.id]?'scored':''}" 
-         onclick="toggleScore('${t.id}', ${t.pts})">
-      <div class="btn-check">✓</div>
-      <div class="btn-label">${t.name}</div>
-      <div class="btn-pts-value">${t.pts} 分</div>
-      <div class="btn-points">${t.desc}</div>
-    </div>
-  `).join('');
-  
-  // Bonuses
-  const bg = document.getElementById('bonusGrid');
-  bg.innerHTML = BONUSES.map(b => `
-    <div class="score-btn type-bonus ${member.scores[b.id]?'scored':''}" 
-         onclick="toggleScore('${b.id}', ${b.pts})">
-      <div class="btn-check">✓</div>
-      <div class="btn-label">${b.name}</div>
-      <div class="btn-pts-value">${b.pts} 分</div>
-      <div class="btn-points">${b.desc}</div>
-    </div>
-  `).join('');
+    <button class="btn btn-g" style="display:block;margin:12px auto 0" onclick="closeModal()">關閉</button>`;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+
+function exportCSV(){
+  let csv='\uFEFF隊伍,隊員,關卡,標靶,額外,總分\n';
+  S.teams.forEach(t=>{ t.members.forEach(m=>{
+    const obs=POINTS.filter(p=>p.type==='obs').reduce((s,p)=>s+(m.sc[p.id]||0),0);
+    const tgt=POINTS.filter(p=>p.type==='tgt').reduce((s,p)=>s+(m.sc[p.id]||0),0);
+    const bon=POINTS.filter(p=>p.type==='bon').reduce((s,p)=>s+(m.sc[p.id]||0),0);
+    csv+=`${t.name},${m.name},${obs},${tgt},${bon},${obs+tgt+bon}\n`;
+  })});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`scores_${new Date().toISOString().slice(0,10)}.csv`; a.click(); toast('已匯出');
 }
 
-function renderLeaderboard() {
-  const c = document.getElementById('leaderboard');
-  const ranked = state.teams.map((t, i) => ({
-    idx: i, name: t.name, 
-    total: t.members.reduce((s,m) => s + calcMemberScore(m), 0),
-    avg: (t.members.reduce((s,m) => s + calcMemberScore(m), 0) / 3)
-  })).sort((a,b) => b.total - a.total);
-  
-  c.innerHTML = ranked.map((r, i) => `
-    <div class="leaderboard-item">
-      <div class="rank-badge rank-${i+1}">${i+1}</div>
-      <div class="leaderboard-team" style="color:${TEAM_COLORS[r.idx]}">${r.name}</div>
-      <div>
-        <div class="leaderboard-score">${r.total}</div>
-        <div class="leaderboard-avg">平均 ${r.avg.toFixed(1)}</div>
-      </div>
-    </div>
-  `).join('');
-}
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function toast(msg){ showToast(msg); }
 
-function renderTeamDetail() {
-  const c = document.getElementById('teamDetail');
-  const team = state.teams[currentTeam];
-  document.getElementById('sidebarTeamName').textContent = team.name + ' 詳情';
-  
-  c.innerHTML = team.members.map((m, i) => {
-    const s = calcMemberScore(m);
-    const max = 140;
-    const pct = Math.round(s/max*100);
-    const done = s > 0;
-    return `
-      <div class="member-detail" style="${i===currentMember?'background:rgba(0,212,255,0.05)':''}">
-        <div>
-          <div class="member-detail-name" style="font-weight:${i===currentMember?'700':'400'}">
-            ${m.name}
-          </div>
-          <div class="member-detail-status ${done?'done':''}">
-            ${done ? `${pct}% 完成` : '未開始'}
-          </div>
-        </div>
-        <div class="member-detail-score">${s}</div>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-    `;
-  }).join('');
-}
-
-function renderAllTeams() {
-  const c = document.getElementById('allTeamsView');
-  c.innerHTML = state.teams.map((t, ti) => `
-    <div style="padding:6px 14px;font-size:12px;font-weight:700;color:${TEAM_COLORS[ti]};border-top:${ti>0?'1px solid rgba(255,255,255,0.05)':'none'};padding-top:${ti>0?'10px':'6px'}">
-      ${t.name}
-    </div>
-    ${t.members.map(m => `
-      <div style="padding:3px 14px 3px 28px;font-size:12px;display:flex;justify-content:space-between;color:var(--text-dim)">
-        <span>${m.name}</span>
-        <span>${calcMemberScore(m)}</span>
-      </div>
-    `).join('')}
-  `).join('');
-}
-
-// ===================== LOGIC =====================
-function selectTeam(i) {
-  currentTeam = i;
-  currentMember = 0;
-  render();
-}
-
-function selectMember(i) {
-  currentMember = i;
-  resetTimer();
-  render();
-}
-
-function toggleScore(id, pts) {
-  const member = state.teams[currentTeam].members[currentMember];
-  if (member.scores[id]) {
-    delete member.scores[id];
-  } else {
-    member.scores[id] = pts;
-  }
-  saveState();
-  render();
-  
-  // Quick toast
-  const total = calcMemberScore(member);
-  showToast(`${member.name}：${total} / 140 分`);
-}
-
-function calcMemberScore(member) {
-  return Object.values(member.scores || {}).reduce((s,v) => s+v, 0);
-}
-
-function calcTeamScore(teamIdx) {
-  return state.teams[teamIdx].members.reduce((s,m) => s + calcMemberScore(m), 0);
-}
-
-// ===================== TIMER =====================
-function toggleTimer() {
-  if (timerRunning) {
-    pauseTimer();
-  } else {
-    startTimer();
-  }
-}
-
-function startTimer() {
-  if (timerRunning) return;
-  timerRunning = true;
-  document.getElementById('timerStartBtn').textContent = '⏸ 暫停';
-  timerInterval = setInterval(() => {
-    timerSeconds--;
-    if (timerSeconds <= 0) {
-      timerSeconds = 0;
-      pauseTimer();
-      showToast('⏰ 時間到！');
-      try { new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=').play(); } catch(e) {}
-    }
-    updateTimerDisplay();
-  }, 1000);
-  updateTimerDisplay();
-}
-
-function pauseTimer() {
-  timerRunning = false;
-  clearInterval(timerInterval);
-  document.getElementById('timerStartBtn').textContent = '▶ 繼續';
-}
-
-function resetTimer() {
-  pauseTimer();
-  timerSeconds = 8 * 60;
-  document.getElementById('timerStartBtn').textContent = '▶ 開始計時';
-  updateTimerDisplay();
-}
-
-function updateTimerDisplay() {
-  const m = Math.floor(timerSeconds / 60);
-  const s = timerSeconds % 60;
-  const el = document.getElementById('timerDisplay');
-  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  el.className = 'timer-display' + 
-    (timerSeconds <= 60 ? ' danger' : timerSeconds <= 120 ? ' warning' : '');
-}
-
-function updateCurrentScore() {
-  const member = state.teams[currentTeam].members[currentMember];
-  document.getElementById('currentScore').textContent = calcMemberScore(member);
-  document.getElementById('currentPlayerLabel').textContent = 
-    `${state.teams[currentTeam].name} — ${member.name}`;
-}
-
-// ===================== ACTIONS =====================
-function resetAll() {
-  if (!confirm('確定要重設全部數據？此操作無法復原！')) return;
-  state = getDefaultState();
-  currentTeam = 0;
-  currentMember = 0;
-  resetTimer();
-  saveState();
-  render();
-  showToast('已重設全部數據');
-}
-
-function showSummary() {
-  const modal = document.getElementById('summaryModal');
-  const content = document.getElementById('summaryContent');
-  
-  const ranked = state.teams.map((t, i) => ({
-    idx: i, name: t.name,
-    members: t.members.map(m => ({ name: m.name, score: calcMemberScore(m) })),
-    total: t.members.reduce((s,m) => s + calcMemberScore(m), 0),
-  })).sort((a,b) => b.total - a.total);
-  
-  content.innerHTML = `
-    <table>
-      <tr>
-        <th>名次</th><th>隊伍</th><th>隊員 1</th><th>隊員 2</th><th>隊員 3</th>
-        <th>總分</th><th>平均</th>
-      </tr>
-      ${ranked.map((r,i) => `
-        <tr class="${i===0?'champion':''}">
-          <td>${['🥇','🥈','🥉','④'][i]}</td>
-          <td style="color:${TEAM_COLORS[r.idx]};font-weight:700">${r.name}</td>
-          ${r.members.map(m => `<td>${m.name}<br><b>${m.score}</b></td>`).join('')}
-          <td style="font-size:20px;font-weight:700;color:var(--accent)">${r.total}</td>
-          <td style="color:var(--text-dim)">${(r.total/3).toFixed(1)}</td>
-        </tr>
-      `).join('')}
-    </table>
-    <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--text-dim)">
-      每人最高 140 分 ｜ 每隊最高 420 分<br>
-      關卡 50 + 標靶 70 + H降落 10 + 吹杯 10
-    </div>
-  `;
-  modal.classList.add('show');
-}
-
-function closeSummary() {
-  document.getElementById('summaryModal').classList.remove('show');
-}
-
-function exportData() {
-  let csv = '\uFEFF隊伍,隊員,關卡得分,標靶得分,額外得分,總分\n';
-  state.teams.forEach(t => {
-    t.members.forEach(m => {
-      const obs = OBSTACLES.reduce((s,o) => s + (m.scores[o.id]||0), 0);
-      const tgt = TARGETS.reduce((s,tg) => s + (m.scores[tg.id]||0), 0);
-      const bon = BONUSES.reduce((s,b) => s + (m.scores[b.id]||0), 0);
-      csv += `${t.name},${m.name},${obs},${tgt},${bon},${obs+tgt+bon}\n`;
-    });
-  });
-  
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `drone_scores_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  showToast('已匯出 CSV');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-// ===================== INIT =====================
-render();
-updateTimerDisplay();
+// ======== INIT ========
+render(); showTime();
 </script>
 </body>
 </html>
